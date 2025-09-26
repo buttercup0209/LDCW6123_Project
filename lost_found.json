@@ -1,0 +1,15 @@
+[
+    {
+        "id": "c95fa0a4-d28a-4ae6-bee4-ca9ee776951a",
+        "name": "iphone 11",
+        "description": "iphone 11 found at train station",
+        "type": "Lost",
+        "poster": "ghost_rider123",
+        "contact": "0123456789",
+        "password": "password",
+        "status": "Open",
+        "image_path": "img\\uploaded_20250927_031113.jpg",
+        "created_at": "2025-09-27T03:11:50.271968",
+        "updated_at": "2025-09-27T03:11:50.271968"
+    }
+]
