@@ -159,6 +159,58 @@ def update_status_display():
 def update_status_display():
     status_label.config(text=f"Total items: {len(data)}")
 
+# Delete item
+def delete_item():
+    def confirm_delete():
+        name = entry_name.get()
+        password = entry_pass.get()
+        
+        if not name or not password:
+            messagebox.showerror("Error", "Both Item Name and Password are required.")
+            return
+        
+        for i, item in enumerate(data):
+            if item["name"].lower() == name.lower():
+                if item["password"] == password:
+                    confirm = messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete '{name}'?")
+                    if confirm:
+                        data.pop(i)
+                        save_data(data)
+                        messagebox.showinfo("Success", f"Item '{name}' deleted successfully!")
+                        delete_win.destroy()
+                        update_status_display()
+                    return
+                else:
+                    messagebox.showerror("Error", "Incorrect password.")
+                    return
+        messagebox.showerror("Error", "Item not found.")
+
+    delete_win = tk.Toplevel(root)
+    delete_win.title("Delete Item")
+    delete_win.geometry("400x250")
+
+    tk.Label(delete_win, text="WARNING: This will permanently delete the item!", 
+             font=("Arial", 10, "bold"), fg="red").pack(pady=10)
+
+    tk.Label(delete_win, text="Item Name:").grid(row=1, column=0, sticky="w", padx=10, pady=10)
+    entry_name = tk.Entry(delete_win, width=30)
+    entry_name.grid(row=1, column=1, padx=10, pady=10)
+
+    tk.Label(delete_win, text="Password:").grid(row=2, column=0, sticky="w", padx=10, pady=10)
+    entry_pass = tk.Entry(delete_win, show="*", width=30)
+    entry_pass.grid(row=2, column=1, padx=10, pady=10)
+
+    button_frame = tk.Frame(delete_win)
+    button_frame.pack(pady=20)
+    tk.Button(button_frame, text="Delete Item", command=confirm_delete, bg="red", fg="white").pack(side=tk.LEFT, padx=5)
+    tk.Button(button_frame, text="Cancel", command=delete_win.destroy).pack(side=tk.LEFT, padx=5)
+
+# Update status display
+def update_status_display():
+    open_items = len([item for item in data if item['status'] == 'Open'])
+    claimed_items = len([item for item in data if item['status'] == 'Claimed'])
+    status_label.config(text=f"Total: {len(data)} | Open: {open_items} | Claimed: {claimed_items}")
+
 #Main app window
 root = tk.Tk()
 root.title("Lost & Found System")
@@ -178,6 +230,9 @@ view_btn.pack(pady=10)
 
 update_btn = tk.Button(root, text="Update Status", command=update_status, bg="orange", fg="white", font=("Arial", 12))
 update_btn.pack(pady=10)
+
+delete_btn = tk.Button(root, text="Delete Item", command=delete_item, bg="red", fg="white", font=("Arial", 12))
+delete_btn.pack(pady=10)
 
 # Show data status
 status_label = tk.Label(root, text=f"Total items: {len(data)}", font=("Arial", 10))
