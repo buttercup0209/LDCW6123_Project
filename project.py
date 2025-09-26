@@ -107,10 +107,57 @@ def view_items():
 
     text_widget.config(state=tk.DISABLED)
 
+# Update item status
+def update_status():
+    def mark_claimed():
+        name = entry_name.get()
+        password = entry_pass.get()
+        
+        if not name or not password:
+            messagebox.showerror("Error", "Both Item Name and Password are required.")
+            return
+        
+        for item in data:
+            if item["name"].lower() == name.lower():
+                if item["password"] == password:
+                    if item["status"] == "Claimed":
+                        messagebox.showinfo("Info", f"{name} is already marked as Claimed.")
+                        return
+                    
+                    item["status"] = "Claimed"
+                    save_data(data)
+                    messagebox.showinfo("Success", f"{name} marked as Claimed!")
+                    update_win.destroy()
+                    update_status_display()
+                    return
+                else:
+                    messagebox.showerror("Error", "Incorrect password.")
+                    return
+        messagebox.showerror("Error", "Item not found.")
+
+    update_win = tk.Toplevel(root)
+    update_win.title("Update Item Status")
+    update_win.geometry("400x200")
+
+    tk.Label(update_win, text="Item Name:").grid(row=0, column=0, sticky="w", padx=10, pady=10)
+    entry_name = tk.Entry(update_win, width=30)
+    entry_name.grid(row=0, column=1, padx=10, pady=10)
+
+    tk.Label(update_win, text="Password:").grid(row=1, column=0, sticky="w", padx=10, pady=10)
+    entry_pass = tk.Entry(update_win, show="*", width=30)
+    entry_pass.grid(row=1, column=1, padx=10, pady=10)
+
+    tk.Button(update_win, text="Mark as Claimed", command=mark_claimed, bg="orange", fg="white").grid(row=2, column=0, columnspan=2, pady=20)
+
+# Update status display
+def update_status_display():
+    open_items = len([item for item in data if item['status'] == 'Open'])
+    claimed_items = len([item for item in data if item['status'] == 'Claimed'])
+    status_label.config(text=f"Total: {len(data)} | Open: {open_items} | Claimed: {claimed_items}")
+
 # Update status display
 def update_status_display():
     status_label.config(text=f"Total items: {len(data)}")
-
 
 #Main app window
 root = tk.Tk()
@@ -129,8 +176,13 @@ add_btn.pack(pady=10)
 view_btn = tk.Button(root, text="View Items", command=view_items, bg="green", fg="white", font=("Arial", 12))
 view_btn.pack(pady=10)
 
+update_btn = tk.Button(root, text="Update Status", command=update_status, bg="orange", fg="white", font=("Arial", 12))
+update_btn.pack(pady=10)
+
 # Show data status
 status_label = tk.Label(root, text=f"Total items: {len(data)}", font=("Arial", 10))
 status_label.pack(pady=20)
+
+update_status_display()
 
 root.mainloop()
