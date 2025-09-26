@@ -6,7 +6,28 @@ import uuid
 from datetime import datetime
 import shutil
 
+#For image handling
+try:
+    from PIL import Image, ImageTk
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
+    print("Warning: Pillow not installed. Image functionality will be limited.")
+
+try:
+    import cv2
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
+    print("Warning: OpenCV not installed. Camera functionality will be disabled.")
+
 DATA_FILE = "lost_found.json"
+IMG_FOLDER = "img"
+
+# Ensure img folder exists
+def ensure_img_folder():
+    if not os.path.exists(IMG_FOLDER):
+        os.makedirs(IMG_FOLDER)
 
 # Load existing data
 def load_data():
@@ -20,7 +41,7 @@ def save_data(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
-# Add new item 
+# Add new item with enhanced structure
 def add_item():
     def save_item():
         item = {
@@ -32,6 +53,7 @@ def add_item():
             "contact": entry_contact.get(),
             "password": entry_pass.get(),
             "status": "Open",
+            "image_path": None,  # For future image support
             "created_at": datetime.now().isoformat(),
             "updated_at": datetime.now().isoformat()
         }
@@ -87,9 +109,12 @@ def add_item():
     entry_pass = tk.Entry(add_win, show="*", width=30)
     entry_pass.grid(row=5, column=1, padx=10, pady=5)
 
+    # Image placeholder (future feature)
+    tk.Label(add_win, text="Image support ready!", fg="gray", font=("Arial", 9)).grid(row=6, column=0, columnspan=2, pady=5)
+
     # Buttons
-    tk.Button(add_win, text="Save Item", command=save_item, bg="green", fg="white").grid(row=6, column=0, pady=20)
-    tk.Button(add_win, text="Cancel", command=add_win.destroy).grid(row=6, column=1, pady=20)
+    tk.Button(add_win, text="Save Item", command=save_item, bg="green", fg="white").grid(row=7, column=0, pady=20)
+    tk.Button(add_win, text="Cancel", command=add_win.destroy).grid(row=7, column=1, pady=20)
 
 # View all items 
 def view_items():
@@ -122,6 +147,7 @@ def view_items():
         text_widget.insert(tk.END, f"Status: {item['status']}\n")
         text_widget.insert(tk.END, f"Posted by: {item['poster']}\n")
         text_widget.insert(tk.END, f"Contact: {item.get('contact', 'N/A')}\n")
+        text_widget.insert(tk.END, f"Image: {item.get('image_path', 'None')}\n")
         text_widget.insert(tk.END, f"Created: {item.get('created_at', 'N/A')[:19]}\n")
         text_widget.insert(tk.END, f"Updated: {item.get('updated_at', 'N/A')[:19]}\n")
         text_widget.insert(tk.END, f"\n")
@@ -171,7 +197,7 @@ def update_status():
 
     tk.Button(update_win, text="Mark as Claimed", command=mark_claimed, bg="orange", fg="white").grid(row=2, column=0, columnspan=2, pady=20)
 
-# Delete item
+# Delete item 
 def delete_item():
     def confirm_delete():
         name = entry_name.get()
@@ -186,6 +212,13 @@ def delete_item():
                 if item["password"] == password:
                     confirm = messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete '{name}'?")
                     if confirm:
+                        # Delete associated image if exists
+                        if item.get('image_path') and os.path.exists(item['image_path']):
+                            try:
+                                os.remove(item['image_path'])
+                            except:
+                                pass  # Image deletion failed but continue
+                        
                         data.pop(i)
                         save_data(data)
                         messagebox.showinfo("Success", f"Item '{name}' deleted successfully!")
@@ -217,25 +250,31 @@ def delete_item():
     tk.Button(button_frame, text="Delete Item", command=confirm_delete, bg="red", fg="white").pack(side=tk.LEFT, padx=5)
     tk.Button(button_frame, text="Cancel", command=delete_win.destroy).pack(side=tk.LEFT, padx=5)
 
-# Update status display
+# Update status display 
 def update_status_display():
     total = len(data)
     open_items = len([item for item in data if item['status'] == 'Open'])
     claimed_items = len([item for item in data if item['status'] == 'Claimed'])
     lost_items = len([item for item in data if item.get('type') == 'Lost'])
     found_items = len([item for item in data if item.get('type') == 'Found'])
+    items_with_images = len([item for item in data if item.get('image_path')])
     
-    status_label.config(text=f"Total: {total} | Open: {open_items} | Claimed: {claimed_items} | Lost: {lost_items} | Found: {found_items}")
+    status_label.config(text=f"Total: {total} | Open: {open_items} | Claimed: {claimed_items} | Lost: {lost_items} | Found: {found_items} | With Images: {items_with_images}")
 
 # Main app window
 root = tk.Tk()
 root.title("Lost & Found System")
-root.geometry("500x450")
+root.geometry("600x450")
 data = load_data()
+ensure_img_folder()
 
 #Label
 title_label = tk.Label(root, text="Lost & Found Management System", font=("Arial", 16, "bold"))
 title_label.pack(pady=30)
+
+# Image support status
+img_status = f"PIL: {'✓' if PIL_AVAILABLE else '✗'}  |  OpenCV: {'✓' if CV2_AVAILABLE else '✗'}"
+tk.Label(root, text=f"Image Support Status: {img_status}", font=("Arial", 9), fg="gray").pack()
 
 # Buttons
 add_btn = tk.Button(root, text="Add Item", command=add_item, bg="blue", fg="white", font=("Arial", 12))
@@ -250,7 +289,7 @@ update_btn.pack(pady=10)
 delete_btn = tk.Button(root, text="Delete Item", command=delete_item, bg="red", fg="white", font=("Arial", 12))
 delete_btn.pack(pady=10)
 
-# Show data status
+# Show enhanced statistics
 status_label = tk.Label(root, text="Loading...", font=("Arial", 10))
 status_label.pack(pady=20)
 
