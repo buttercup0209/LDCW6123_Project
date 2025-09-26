@@ -74,6 +74,44 @@ def add_item():
     tk.Button(add_win, text="Save Item", command=save_item, bg="green", fg="white").grid(row=5, column=0, pady=20)
     tk.Button(add_win, text="Cancel", command=add_win.destroy).grid(row=5, column=1, pady=20)
 
+# View all items
+def view_items():
+    view_win = tk.Toplevel(root)
+    view_win.title("All Items")
+    view_win.geometry("800x500")
+
+    if not data:
+        tk.Label(view_win, text="No items found!", font=("Arial", 16)).pack(pady=50)
+        return
+
+    # Create text widget with scrollbar
+    frame = tk.Frame(view_win)
+    frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+    text_widget = tk.Text(frame, wrap=tk.WORD, font=("Arial", 10))
+    scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL, command=text_widget.yview)
+    text_widget.configure(yscrollcommand=scrollbar.set)
+
+    text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    # Display all items
+    for i, item in enumerate(data, 1):
+        text_widget.insert(tk.END, f"--- Item {i} ---\n")
+        text_widget.insert(tk.END, f"Name: {item['name']}\n")
+        text_widget.insert(tk.END, f"Description: {item.get('description', 'N/A')}\n")
+        text_widget.insert(tk.END, f"Status: {item['status']}\n")
+        text_widget.insert(tk.END, f"Posted by: {item['poster']}\n")
+        text_widget.insert(tk.END, f"Contact: {item.get('contact', 'N/A')}\n")
+        text_widget.insert(tk.END, f"\n")
+
+    text_widget.config(state=tk.DISABLED)
+
+# Update status display
+def update_status_display():
+    status_label.config(text=f"Total items: {len(data)}")
+
+
 #Main app window
 root = tk.Tk()
 root.title("Lost & Found System")
@@ -87,6 +125,9 @@ title_label.pack(pady=50)
 # Add button
 add_btn = tk.Button(root, text="Add Item", command=add_item, bg="blue", fg="white", font=("Arial", 12))
 add_btn.pack(pady=10)
+
+view_btn = tk.Button(root, text="View Items", command=view_items, bg="green", fg="white", font=("Arial", 12))
+view_btn.pack(pady=10)
 
 # Show data status
 status_label = tk.Label(root, text=f"Total items: {len(data)}", font=("Arial", 10))
