@@ -7,9 +7,35 @@
         "poster": "ghost_rider123",
         "contact": "0123456789",
         "password": "password",
-        "status": "Open",
+        "status": "Claimed",
         "image_path": "img\\uploaded_20250927_031113.jpg",
         "created_at": "2025-09-27T03:11:50.271968",
-        "updated_at": "2025-09-27T03:11:50.271968"
+        "updated_at": "2025-09-27T23:45:32.653088"
+    },
+    {
+        "id": "da66e357-b5d4-452c-b148-45668197c9bb",
+        "name": "Sony headphones",
+        "description": "Sony headphones found at MMU library",
+        "type": "Found",
+        "status": "Open",
+        "poster": "mmu_student",
+        "contact": "0112234567",
+        "password": "Sony",
+        "image_path": "img\\uploaded_20250927_032404.jpg",
+        "created_at": "2025-09-27T03:24:07.954029",
+        "updated_at": "2025-09-27T03:24:07.954029"
+    },
+    {
+        "id": "7257cea6-f6a0-4e12-9c1d-5d409b285492",
+        "name": "Airpods Pro",
+        "description": "Airpods pro lost at MMU bakery",
+        "type": "Lost",
+        "status": "Open",
+        "poster": "annonymous123",
+        "contact": "0112233445",
+        "password": "12345",
+        "image_path": "img\\uploaded_20250927_183310.jpg",
+        "created_at": "2025-09-27T18:33:11.718914",
+        "updated_at": "2025-09-27T18:33:11.718914"
     }
 ]
